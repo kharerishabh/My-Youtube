@@ -1,1 +1,13 @@
--My Youtube
+- This is my-youtube clone projects by using the google youtube API
+- My Youtube
+-  Header
+ - Sidebar
+ - Search Input
+ - User Logo
+- Body
+ - MainContainer
+  - ButtonLits
+   - Button
+  - Video Container
+   - Video Card
+- Watch Page to Watch the Video
