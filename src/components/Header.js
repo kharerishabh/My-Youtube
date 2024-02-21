@@ -5,20 +5,28 @@ import {
   YOUTUBE_SEARCH_API,
   YT_LOGO,
 } from "../utilis/constant";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleMenu } from "../store/appSlice";
 import { useState } from "react";
 import { useEffect } from "react";
+import { cacheResult } from "../store/searchSlice";
 const Header = () => {
+  const disptach = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestion, setSuggestion] = useState([]);
-  const [showSuggestion, setShowSuggestion] = useState(false)
+  const [showSuggestion, setShowSuggestion] = useState(false);
+
+  const searchResults = useSelector((store) => store.search);
 
   useEffect(() => {
-    //API call
-    console.log(searchQuery);
-
-    const timer = setTimeout(() => getSearchSuggestion(), 200);
+    //API call if not present
+    const timer = setTimeout(() => {
+      if(searchResults[searchQuery]) {
+        setSuggestion(searchResults[searchQuery])
+      }else{
+        getSearchSuggestion();
+      }
+    }, 200);
 
     return () => {
       clearTimeout(timer);
@@ -33,12 +41,12 @@ const Header = () => {
       const data = await fetch(YOUTUBE_SEARCH_API + searchQuery);
       const json = await data.json();
       setSuggestion(json[1]);
+      disptach(cacheResult({[searchQuery]: json[1]}))
     } catch (err) {
       console.log(err.message);
     }
   };
 
-  const disptach = useDispatch();
   const toggleMenuHandler = () => {
     disptach(toggleMenu());
   };
@@ -68,15 +76,17 @@ const Header = () => {
             🔍
           </button>
         </div>
-       {showSuggestion && <div className="px-2 py-2 fixed bg-white w-[33rem] shadow-lg rounded-lg border border-gray-100">
-          <ul>
-            {suggestion.map((s) => (
-              <li key={s} className="py-2 px-3 shadow-sm hover:bg-gray-100">
-                🔍 {s}
-              </li>
-            ))}
-          </ul>
-        </div>}
+        {showSuggestion && (
+          <div className="px-2 py-2 fixed bg-white w-[33rem] shadow-lg rounded-lg border border-gray-100">
+            <ul>
+              {suggestion.map((s) => (
+                <li key={s} className="py-2 px-3 shadow-sm hover:bg-gray-100">
+                  🔍 {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
       <div className="col-span-1">
         <img className="h-8" alt="user" src={USER_ICON} />
